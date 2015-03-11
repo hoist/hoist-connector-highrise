@@ -4,10 +4,12 @@
   "url": "http://www.highrisehq.com",
   "auth_types" : {
     "Private": {
-      "setup_help": "./samples/setupHelp.md"
+      "setup_help": "./samples/setupHelp.md",
+      "requires_signing" : false
     },
     "Public": {
-      "setup_help": "./samples/setupHelpPublic.md"
+      "setup_help": "./samples/setupHelpPublic.md",
+      "requires_signing" : true
     }
   },
   "settings": [{
