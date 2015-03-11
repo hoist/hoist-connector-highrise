@@ -1,51 +1,51 @@
 'use strict';
 require('../bootstrap');
-var WorkflowMax = require('../../lib/connector');
+var Highrise = require('../../lib/connector');
 var fs = require('fs');
 var path = require('path');
 var expect = require('chai').expect;
 var config = require('config');
 
-describe('WorkflowMaxConnector #put', function () {
-  // wfm user license limit reached, needs a new accountkey each test
+describe('HighriseConnector #put', function () {
+  
   this.timeout(500000);
-  describe('valid connection to post client with json object', function () {
+  describe('valid connection to post person with json object', function () {
     var response;
     var connector;
-    var data = {Client:{ID:5031591, Name: 'Hoist', Address: 41}};
+    var data = {person: {"last-name" : "TestName"}};
     before(function () {
-      connector = new WorkflowMax({
-        apiKey: config.apiKey, 
-        accountKey: config.accountKey
+      connector = new Highrise({
+        apiToken: config.apiToken, 
+        domain: config.domain
       });
-      response = connector.post('client.api/add', data);
+      response = connector.put('people/227913545.xml', data);
     });
     it('returns expected json', function () {
       return expect(response.then(function (json) {
-        return json.Response.Client.Address;
+        return json.person['last-name'][0];
       }).catch(function(err) {
         console.log("error", err);
-      })).to.become('41');
+      })).to.become('TestName');
     });
   });
   
   describe('valid connection to post client with xml', function () {
     var response;
     var connector;
-    var data = '<Client><ID>5031591</ID><Name>Hoist</Name><Address>41</Address></Client>';
+    var data = '<person><last-name>TestName2</last-name></person>';
     before(function () {
-      connector = new WorkflowMax({
-        apiKey: config.apiKey, 
-        accountKey: config.accountKey
+      connector = new Highrise({
+        apiToken: config.apiToken, 
+        domain: config.domain
       });
-      response = connector.post('client.api/add', data);
+      response = connector.put('people/227913545.xml', data);
     });
     it('returns expected json', function () {
       return expect(response.then(function (json) {
-        return json.Response.Client.Address;
+        return json.person['last-name'][0];
       }).catch(function(err) {
         console.log("error", err);
-      })).to.become('41');
+      })).to.become('TestName2');
     });
   });
 });

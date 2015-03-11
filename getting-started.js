@@ -2,13 +2,26 @@
 
 module.exports = function (event, done) {
 
-  var wfm = Hoist.connector('<key>');
-  wfm.get('/job.api/current')
-    .then(function (result) {
-      var jobs = result.jobs.job;
+  /* For yourself */
+  var highrise = Hoist.connector('<key>');
+  highrise.get('/people')
+    .then(function (people) {
       var promises = [];
-      for (var index = 0; index < jobs.length; index++) {
-        promises.push(Hoist.event.raise('job:found', jobs[index]));
+      for (var index = 0; index < people.length; index++) {
+        promises.push(Hoist.event.raise('person:found', people[index]));
+      }
+      return Hoist.promise.all(promises);
+    })
+    .then(done);
+
+  /* For your users */
+  var highrise = Hoist.connector('<key>');
+  highrise.authorize('token')
+    .get('/people')
+    .then(function (people) {
+      var promises = [];
+      for (var index = 0; index < people.length; index++) {
+        promises.push(Hoist.event.raise('person:found', people[index]));
       }
       return Hoist.promise.all(promises);
     })

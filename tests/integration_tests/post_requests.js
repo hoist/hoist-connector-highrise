@@ -1,50 +1,55 @@
 'use strict';
 require('../bootstrap');
-var WorkflowMax = require('../../lib/connector');
+var Highrise = require('../../lib/connector');
 var fs = require('fs');
 var path = require('path');
 var expect = require('chai').expect;
 var config = require('config');
 
-describe('WorkflowMaxConnector #post', function () {
+var newCompany_json = {
+  company: {
+    name: "Let's go sail a boat PTY LTD"
+  }
+};
+var newCompany_xml = '<company><name>Let\'s go sail a boat PTY LTD</name></company>';
+
+describe('HighriseConnector #post', function () {
   this.timeout(500000);
-  describe('valid connection to post client with json object', function () {
+  describe('valid connection to post company with json object', function () {
     var response;
     var connector;
-    var data = {Client:{Name:"John"}};
     before(function () {
-      connector = new WorkflowMax({
-        apiKey: config.apiKey, 
-        accountKey: config.accountKey
+      connector = new Highrise({
+        apiToken: config.apiToken, 
+        domain: config.domain
       });
-      response = connector.post('client.api/add', data);
+      response = connector.post('companies.xml', newCompany_json);
     });
     it('returns expected json', function () {
       return expect(response.then(function (json) {
-        return json.Response.Client.Name;
+        return json.company.name[0];
       }).catch(function(err) {
         console.log("error", err);
-      })).to.become('John');
+      })).to.become(newCompany_json.company.name);
     });
   });
   
-  describe('valid connection to post client with xml', function () {
+  describe('valid connection to post company with xml', function () {
     var response;
     var connector;
-    var data = '<Client><Name>John</Name></Client>';
     before(function () {
-      connector = new WorkflowMax({
-        apiKey: config.apiKey, 
-        accountKey: config.accountKey
+      connector = new Highrise({
+        apiToken: config.apiToken, 
+        domain: config.domain
       });
-      response = connector.post('client.api/add', data);
+      response = connector.post('companies.xml', newCompany_xml);
     });
     it('returns expected json', function () {
       return expect(response.then(function (json) {
-        return json.Response.Client.Name;
+        return json.company.name[0];
       }).catch(function(err) {
         console.log("error", err);
-      })).to.become('John');
+      })).to.become(newCompany_json.company.name);
     });
   });
 });

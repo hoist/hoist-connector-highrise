@@ -1,4 +1,4 @@
-hoist-connector-workflowmax
+hoist-connector-highrise
 ===========================
 
-Hoist Connect's WorkflowMax Connector
+Hoist Connect's Highrise Connector

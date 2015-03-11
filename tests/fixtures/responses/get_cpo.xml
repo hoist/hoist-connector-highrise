@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<people type="array">
+  <person>
+    <author-id type="integer">1109068</author-id>
+    <background></background>
+    <company-id type="integer" nil="true"></company-id>
+    <created-at type="datetime">2015-02-20T02:06:38Z</created-at>
+    <first-name>Steve</first-name>
+    <group-id type="integer" nil="true"></group-id>
+    <id type="integer">227913545</id>
+    <last-name>Jones</last-name>
+    <owner-id type="integer" nil="true"></owner-id>
+    <title>CPO</title>
+    <updated-at type="datetime">2015-02-20T02:06:38Z</updated-at>
+    <visible-to>Everyone</visible-to>
+    <company-name nil="true"></company-name>
+    <linkedin-url nil="true"></linkedin-url>
+    <avatar-url>http://cdn.37img.com/highrise/missing/avatar.gif?r=3</avatar-url>
+<contact-data>
+  <instant-messengers type="array"/>
+  <twitter-accounts type="array"/>
+  <phone-numbers type="array"/>
+  <web-addresses type="array"/>
+  <addresses type="array"/>
+  <email-addresses type="array"/>
+</contact-data>
+  </person>
+</people>

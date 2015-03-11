@@ -1,30 +1,34 @@
 'use strict';
 require('../bootstrap');
-var WorkflowMax = require('../../lib/connector');
+var Highrise = require('../../lib/connector');
 var fs = require('fs');
 var path = require('path');
 var expect = require('chai').expect;
 var config = require('config');
 
-describe('WorkflowMaxConnector #delete', function () {
+describe('HighriseConnector #delete', function () {
   this.timeout(500000);
-  describe('valid connection to delete contacts', function () {
+  describe('valid connection to delete company', function () {
     var response;
     var connector;
-    var expectedResponse = require(path.resolve(__dirname, '../fixtures/responses/delete_contact.api.json'));
-    before(function () {
-      connector = new WorkflowMax({
-        apiKey: config.apiKey, 
-        accountKey: config.accountKey
+    before(function (done) {
+      connector = new Highrise({
+        apiToken: config.apiToken, 
+        domain: config.domain
       });
-      response = connector.delete('client.api/contact/3500761');
+      connector.post('companies.xml', {company: {name: "My Test Company"}})
+        .then(function(res) {
+          response = connector.delete('companies/' + res.company.id[0]._ + '.xml');
+          done();
+          return;
+        });
     });
     it('returns expected json', function () {
       return expect(response.then(function (json) {
-        return json.Response.Contact.Name;
+        return json;
       }).catch(function(err) {
         console.log("error", err);
-      })).to.become(expectedResponse.Response.Contact.Name);
+      })).to.become({});
     });
   });
 });

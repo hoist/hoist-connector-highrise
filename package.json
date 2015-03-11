@@ -1,19 +1,19 @@
 {
-  "name": "hoist-connector-workflowmax",
+  "name": "hoist-connector-highrise",
   "version": "1.0.0",
-  "description": "Hoist's WorkflowMax Connector",
+  "description": "Hoist's Highrise Connector",
   "main": "./lib/connector.js",
   "scripts": {
     "test": "gulp test"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/hoist/hoist-connector-workflowmax.git"
+    "url": "https://github.com/hoist/hoist-connector-highrise.git"
   },
   "author": "Hoist Apps Ltd",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/hoist/hoist-connector-workflowmax/issues"
+    "url": "https://github.com/hoist/hoist-connector-highrise/issues"
   },
   "devDependencies": {
     "chai": "^1.9.1",
@@ -29,7 +29,7 @@
     "sinon": "^1.10.3",
     "sinon-chai": "^2.5.0"
   },
-  "homepage": "https://github.com/hoist/hoist-connector-xero",
+  "homepage": "https://github.com/hoist/hoist-connector-highrise",
   "dependencies": {
     "bluebird": "^2.3.11",
     "config": "^1.8.1",

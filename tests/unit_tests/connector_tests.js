@@ -1,6 +1,6 @@
 'use strict';
 require('../bootstrap');
-var WorkflowMax = require('../../lib/connector');
+var Highrise = require('../../lib/connector');
 var sinon = require('sinon');
 var BBPromise = require('bluebird');
 var expect = require('chai').expect;
@@ -8,13 +8,12 @@ var requestPromise = require('request-promise');
 var config = require('config');
 var errors = require('hoist-errors');
 
-describe('WorkflowMaxConnector', function () {
+describe('HighriseConnector', function () {
   var connector;
   before(function () {
-    connector = new WorkflowMax({
-      apiKey: config.apiKey,
-      accountKey: config.accountKey,
-      domain: config.domain + 'test'
+    connector = new Highrise({
+      apiToken: config.apiToken, 
+      domain: config.domain
     });
   });
   describe('#get', function () {
@@ -23,14 +22,14 @@ describe('WorkflowMaxConnector', function () {
       var result;
       before(function () {
         sinon.stub(connector, 'request').returns(BBPromise.resolve(response));
-        result = connector.get('job.api');
+        result = connector.get('people.xml');
       });
       after(function () {
         connector.request.restore();
       });
       it('calls #request', function () {
         expect(connector.request)
-          .to.have.been.calledWith('GET', 'job.api', undefined);
+          .to.have.been.calledWith('GET', 'people.xml', undefined);
       });
     });
     describe('with queryParams', function () {
@@ -41,14 +40,14 @@ describe('WorkflowMaxConnector', function () {
       };
       before(function () {
         sinon.stub(connector, 'request').returns(BBPromise.resolve(response));
-        result = connector.get('job.api', queryParams);
+        result = connector.get('people.xml', queryParams);
       });
       after(function () {
         connector.request.restore();
       });
       it('calls #request', function () {
         expect(connector.request)
-          .to.have.been.calledWith('GET', 'job.api', queryParams);
+          .to.have.been.calledWith('GET', 'people.xml', queryParams);
       });
     });
   });
@@ -68,14 +67,14 @@ describe('WorkflowMaxConnector', function () {
       };
       before(function () {
         sinon.stub(connector, 'request').returns(BBPromise.resolve(response));
-        result = connector.post('staff.api/add', data);
+        result = connector.post('people.xml', data);
       });
       after(function () {
         connector.request.restore();
       });
       it('calls #request', function () {
         expect(connector.request)
-          .to.have.been.calledWith('POST', 'staff.api/add', null, data);
+          .to.have.been.calledWith('POST', 'people.xml', null, data);
       });
     });
   });
@@ -95,14 +94,14 @@ describe('WorkflowMaxConnector', function () {
       };
       before(function () {
         sinon.stub(connector, 'request').returns(BBPromise.resolve(response));
-        result = connector.put('client.api/update', data);
+        result = connector.put('people.xml', data);
       });
       after(function () {
         connector.request.restore();
       });
       it('calls #request', function () {
         expect(connector.request)
-          .to.have.been.calledWith('PUT', 'client.api/update', null, data);
+          .to.have.been.calledWith('PUT', 'people.xml', null, data);
       });
     });
   });
@@ -111,14 +110,14 @@ describe('WorkflowMaxConnector', function () {
     var result;
     before(function () {
       sinon.stub(connector, 'request').returns(BBPromise.resolve(response));
-      result = connector.delete('job.api');
+      result = connector.delete('people/id.xml');
     });
     after(function () {
       connector.request.restore();
     });
     it('calls #request', function () {
       expect(connector.request)
-        .to.have.been.calledWith('DELETE', 'job.api', undefined, undefined);
+        .to.have.been.calledWith('DELETE', 'people/id.xml', undefined, undefined);
     });
   });
   describe('#request', function () {
@@ -130,45 +129,19 @@ describe('WorkflowMaxConnector', function () {
         var options = {
           method: 'GET',
           resolveWithFullResponse: true,
-          uri: 'https://api.workflowmax.comtest/job.api/current?apiKey=' + config.apiKey + '&accountKey=' + config.accountKey
-        }
-        var result;
-        before(function () {
-          sinon.stub(connector, 'requestPromiseHelper').returns(BBPromise.resolve(response));
-          sinon.stub(connector.parser, 'parseStringAsync').returns(BBPromise.resolve());
-          result = connector.request('GET', '/job.api/current');
-        });
-        after(function () {
-          connector.requestPromiseHelper.restore();
-          connector.parser.parseStringAsync.restore();
-        });
-        it('calls requestPromiseHelper', function () {
-          expect(connector.requestPromiseHelper)
-            .to.have.been.calledWith(options);
-        });
-        it('calls parser.parseStringAsync', function () {
-          expect(connector.parser.parseStringAsync)
-            .to.have.been.calledWith(response.body);
-        });
-      });
-      describe('with no queryParams, with no domain in settings', function () {
-        var response = {
-          body: 'body'
+          uri: 'https://' + config.apiToken + ':X@' + config.domain + '.highrisehq.com/people.xml',
+          headers: {
+            'Content-Type': "application/xml",
+            'User-Agent': "Hoist Integration (support@hoist.io)"
+          }
         };
-        var options = {
-          method: 'GET',
-          resolveWithFullResponse: true,
-          uri: 'https://api.workflowmax.com/job.api/current?apiKey=' + config.apiKey + '&accountKey=' + config.accountKey
-        }
         var result;
         before(function () {
-          connector.settings.domain = undefined;
           sinon.stub(connector, 'requestPromiseHelper').returns(BBPromise.resolve(response));
           sinon.stub(connector.parser, 'parseStringAsync').returns(BBPromise.resolve());
-          result = connector.request('GET', '/job.api/current');
+          result = connector.request('GET', '/people.xml');
         });
         after(function () {
-          connector.settings.domain = config.domain + 'test';
           connector.requestPromiseHelper.restore();
           connector.parser.parseStringAsync.restore();
         });
@@ -192,13 +165,17 @@ describe('WorkflowMaxConnector', function () {
         var options = {
           method: 'GET',
           resolveWithFullResponse: true,
-          uri: 'https://api.workflowmax.comtest/job.api/current?apiKey=' + config.apiKey + '&accountKey=' + config.accountKey + '&query=' + queryParams.query
-        };
+          uri: 'https://' + config.apiToken + ':X@' + config.domain + '.highrisehq.com/people.xml?query=' + queryParams.query,
+          headers: {
+            'Content-Type': "application/xml",
+            'User-Agent': "Hoist Integration (support@hoist.io)"
+          }
+        }
         var result;
         before(function () {
           sinon.stub(connector, 'requestPromiseHelper').returns(BBPromise.resolve(response));
           sinon.stub(connector.parser, 'parseStringAsync').returns(BBPromise.resolve());
-          result = connector.request('GET', 'job.api/current', queryParams);
+          result = connector.request('GET', 'people.xml', queryParams);
         });
         after(function () {
           connector.requestPromiseHelper.restore();
@@ -221,13 +198,17 @@ describe('WorkflowMaxConnector', function () {
         var options = {
           method: 'GET',
           resolveWithFullResponse: true,
-          uri: 'https://api.workflowmax.comtest/job.api/current?apiKey=' + config.apiKey + '&accountKey=' + config.accountKey + '&query=query'
+          uri: 'https://' + config.apiToken + ':X@' + config.domain + '.highrisehq.com/people.xml?query=query',
+          headers: {
+            'Content-Type': "application/xml",
+            'User-Agent': "Hoist Integration (support@hoist.io)"
+          }
         };
         var result;
         before(function () {
           sinon.stub(connector, 'requestPromiseHelper').returns(BBPromise.resolve(response));
           sinon.stub(connector.parser, 'parseStringAsync').returns(BBPromise.resolve());
-          result = connector.request('GET', 'job.api/current?query=query');
+          result = connector.request('GET', 'people.xml?query=query');
         });
         after(function () {
           connector.requestPromiseHelper.restore();
@@ -253,13 +234,17 @@ describe('WorkflowMaxConnector', function () {
         var options = {
           method: 'GET',
           resolveWithFullResponse: true,
-          uri: 'https://api.workflowmax.comtest/job.api/current?apiKey=' + config.apiKey + '&accountKey=' + config.accountKey + '&querypath=querypath&query=' + queryParams.query
+          uri: 'https://' + config.apiToken + ':X@' + config.domain + '.highrisehq.com/people.xml?querypath=querypath&query=' + queryParams.query + '',
+          headers: {
+            'Content-Type': "application/xml",
+            'User-Agent': "Hoist Integration (support@hoist.io)"
+          }
         };
         var result;
         before(function () {
           sinon.stub(connector, 'requestPromiseHelper').returns(BBPromise.resolve(response));
           sinon.stub(connector.parser, 'parseStringAsync').returns(BBPromise.resolve());
-          result = connector.request('GET', 'job.api/current?querypath=querypath', queryParams);
+          result = connector.request('GET', 'people.xml?querypath=querypath', queryParams);
         });
         after(function () {
           connector.requestPromiseHelper.restore();
@@ -284,13 +269,17 @@ describe('WorkflowMaxConnector', function () {
         var options = {
           method: 'GET',
           resolveWithFullResponse: true,
-          uri: 'https://api.workflowmax.comtest/job.api/current?apiKey=' + config.apiKey + '&accountKey=' + config.accountKey + '&query=' + queryParams.query
+          uri: 'https://' + config.apiToken + ':X@' + config.domain + '.highrisehq.com/people.xml?query=' + queryParams.query + '',
+          headers: {
+            'Content-Type': "application/xml",
+            'User-Agent': "Hoist Integration (support@hoist.io)"
+          }
         };
         var result;
         before(function () {
           sinon.stub(connector, 'requestPromiseHelper').returns(BBPromise.resolve(response));
           sinon.stub(connector.parser, 'parseStringAsync').returns(BBPromise.resolve());
-          result = connector.request('GET', 'job.api/current?query=queryfalse', queryParams);
+          result = connector.request('GET', 'people.xml?query=queryfalse', queryParams);
         });
         after(function () {
           connector.requestPromiseHelper.restore();
@@ -311,19 +300,23 @@ describe('WorkflowMaxConnector', function () {
         var response = {
           body: 'body'
         };
-        var data = '<Staff><Name>John</Name></Staff>';
+        var data = '<person><first-name>Sam</first-name></person>';
         var options = {
           method: 'POST',
           resolveWithFullResponse: true,
-          uri: 'https://api.workflowmax.comtest/staff.api/add?apiKey=' + config.apiKey + '&accountKey=' + config.accountKey,
+          uri: 'https://' + config.apiToken + ':X@' + config.domain + '.highrisehq.com/people.xml',
           body: data,
-          contentType: 'application/xml'
+          contentType: 'application/xml',
+          headers: {
+            'Content-Type': "application/xml",
+            'User-Agent': "Hoist Integration (support@hoist.io)"
+          }
         };
         var result;
         before(function () {
           sinon.stub(connector, 'requestPromiseHelper').returns(BBPromise.resolve(response));
           sinon.stub(connector.parser, 'parseStringAsync').returns(BBPromise.resolve());
-          result = connector.request('POST', 'staff.api/add', null, data);
+          result = connector.request('POST', 'people.xml', null, data);
         });
         after(function () {
           connector.requestPromiseHelper.restore();
@@ -342,20 +335,24 @@ describe('WorkflowMaxConnector', function () {
         var response = {
           body: 'body'
         };
-        var data = '{"Staff":{"Name":"John"}}';
-        var xml = '<Staff><Name>John</Name></Staff>';
+        var data = '{"person":{"first-name":"John"}}';
+        var xml = '<person><first-name>John</first-name></person>';
         var options = {
           method: 'POST',
           resolveWithFullResponse: true,
-          uri: 'https://api.workflowmax.comtest/staff.api/add?apiKey=' + config.apiKey + '&accountKey=' + config.accountKey,
+          uri: 'https://' + config.apiToken + ':X@' + config.domain + '.highrisehq.com/people.xml',
           body: xml,
-          contentType: 'application/xml'
+          contentType: 'application/xml',
+          headers: {
+            'Content-Type': "application/xml",
+            'User-Agent': "Hoist Integration (support@hoist.io)"
+          }
         };
         var result;
         before(function () {
           sinon.stub(connector, 'requestPromiseHelper').returns(BBPromise.resolve(response));
           sinon.stub(connector.parser, 'parseStringAsync').returns(BBPromise.resolve());
-          result = connector.request('POST', 'staff.api/add', null, data);
+          result = connector.request('POST', 'people.xml', null, data);
         });
         after(function () {
           connector.requestPromiseHelper.restore();
@@ -374,20 +371,24 @@ describe('WorkflowMaxConnector', function () {
         var response = {
           body: 'body'
         };
-        var data = {Staff:{Name:"John"}};
-        var xml = '<Staff><Name>John</Name></Staff>';
+        var data = {person:{'first-name':"John"}};
+        var xml = '<person><first-name>John</first-name></person>';
         var options = {
           method: 'POST',
           resolveWithFullResponse: true,
-          uri: 'https://api.workflowmax.comtest/staff.api/add?apiKey=' + config.apiKey + '&accountKey=' + config.accountKey,
+          uri: 'https://' + config.apiToken + ':X@' + config.domain + '.highrisehq.com/people.xml',
           body: xml,
-          contentType: 'application/xml'
+          contentType: 'application/xml',
+          headers: {
+            'Content-Type': "application/xml",
+            'User-Agent': "Hoist Integration (support@hoist.io)"
+          }
         };
         var result;
         before(function () {
           sinon.stub(connector, 'requestPromiseHelper').returns(BBPromise.resolve(response));
           sinon.stub(connector.parser, 'parseStringAsync').returns(BBPromise.resolve());
-          result = connector.request('POST', 'staff.api/add', null, data);
+          result = connector.request('POST', 'people.xml', null, data);
         });
         after(function () {
           connector.requestPromiseHelper.restore();
@@ -408,19 +409,23 @@ describe('WorkflowMaxConnector', function () {
         var response = {
           body: 'body'
         };
-        var data = '<Staff><Name>John</Name></Staff>';
+        var data = '<person><first-name>John</first-name></person>';
         var options = {
           method: 'PUT',
           resolveWithFullResponse: true,
-          uri: 'https://api.workflowmax.comtest/staff.api/add?apiKey=' + config.apiKey + '&accountKey=' + config.accountKey,
+          uri: 'https://' + config.apiToken + ':X@' + config.domain + '.highrisehq.com/people.xml?reload=true',
           body: data,
-          contentType: 'application/xml'
+          contentType: 'application/xml',
+          headers: {
+            'Content-Type': "application/xml",
+            'User-Agent': "Hoist Integration (support@hoist.io)"
+          }
         };
         var result;
         before(function () {
           sinon.stub(connector, 'requestPromiseHelper').returns(BBPromise.resolve(response));
           sinon.stub(connector.parser, 'parseStringAsync').returns(BBPromise.resolve());
-          result = connector.request('PUT', 'staff.api/add', null, data);
+          result = connector.request('PUT', 'people.xml', null, data);
         });
         after(function () {
           connector.requestPromiseHelper.restore();
@@ -439,20 +444,24 @@ describe('WorkflowMaxConnector', function () {
         var response = {
           body: 'body'
         };
-        var data = '{"Staff":{"Name":"John"}}';
-        var xml = '<Staff><Name>John</Name></Staff>';
+        var data = '{"person":{"first-name":"John"}}';
+        var xml = '<person><first-name>John</first-name></person>';
         var options = {
           method: 'PUT',
           resolveWithFullResponse: true,
-          uri: 'https://api.workflowmax.comtest/staff.api/add?apiKey=' + config.apiKey + '&accountKey=' + config.accountKey,
+          uri: 'https://' + config.apiToken + ':X@' + config.domain + '.highrisehq.com/people.xml?reload=true',
           body: xml,
-          contentType: 'application/xml'
+          contentType: 'application/xml',
+          headers: {
+            'Content-Type': "application/xml",
+            'User-Agent': "Hoist Integration (support@hoist.io)"
+          }
         };
         var result;
         before(function () {
           sinon.stub(connector, 'requestPromiseHelper').returns(BBPromise.resolve(response));
           sinon.stub(connector.parser, 'parseStringAsync').returns(BBPromise.resolve());
-          result = connector.request('PUT', 'staff.api/add', null, data);
+          result = connector.request('PUT', 'people.xml', null, data);
         });
         after(function () {
           connector.requestPromiseHelper.restore();
@@ -471,20 +480,24 @@ describe('WorkflowMaxConnector', function () {
         var response = {
           body: 'body'
         };
-        var data = {Staff:{Name:"John"}};
-        var xml = '<Staff><Name>John</Name></Staff>';
+        var data = {person:{'first-name':"John"}};
+        var xml = '<person><first-name>John</first-name></person>';
         var options = {
           method: 'PUT',
           resolveWithFullResponse: true,
-          uri: 'https://api.workflowmax.comtest/staff.api/add?apiKey=' + config.apiKey + '&accountKey=' + config.accountKey,
+          uri: 'https://' + config.apiToken + ':X@' + config.domain + '.highrisehq.com/people.xml?reload=true',
           body: xml,
-          contentType: 'application/xml'
+          contentType: 'application/xml',
+          headers: {
+            'Content-Type': "application/xml",
+            'User-Agent': "Hoist Integration (support@hoist.io)"
+          }
         };
         var result;
         before(function () {
           sinon.stub(connector, 'requestPromiseHelper').returns(BBPromise.resolve(response));
           sinon.stub(connector.parser, 'parseStringAsync').returns(BBPromise.resolve());
-          result = connector.request('PUT', 'staff.api/add', null, data);
+          result = connector.request('PUT', 'people.xml', null, data);
         });
         after(function () {
           connector.requestPromiseHelper.restore();
@@ -508,98 +521,5 @@ describe('WorkflowMaxConnector', function () {
       });
     });
   });
-  describe('#authorize', function () {
-    describe('with accountKey and apiKey and domain', function () {
-      var options = {
-        apiKey: 'apiKey',
-        accountKey: 'accountKey',
-        domain: 'newdomain'
-      }
-      before(function () {
-        return connector.authorize(options);
-      });
-      after(function () {
-        connector.settings = {
-          apiKey: config.apiKey,
-          accountKey: config.accountKey
-        };
-      });
-      it('sets the apiKey', function () {
-        expect(connector.settings.apiKey).to.eql(options.apiKey);
-      });
-      it('sets the accountKey', function () {
-        expect(connector.settings.accountKey).to.eql(options.accountKey);
-      });
-      it('sets the domain', function () {
-        expect(connector.settings.domain).to.eql(options.domain);
-      });
-    });
-    describe('with only domain', function () {
-      var options = {
-        domain: 'domain'
-      }
-      before(function () {
-        return connector.authorize(options);
-      });
-      after(function () {
-        connector.settings = {
-          apiKey: config.apiKey,
-          accountKey: config.accountKey,
-          domain: config.domain + 'test'
-        };
-      });
-      it('does not change the apiKey', function () {
-        expect(connector.settings.apiKey).to.eql(config.apiKey);
-      });
-      it('does not change the accountKey', function () {
-        expect(connector.settings.accountKey).to.eql(config.accountKey);
-      });
-      it('sets the domain', function () {
-        expect(connector.settings.domain).to.eql(options.domain);
-      });
-    });
-    describe('with only accountKey', function () {
-      var options = {
-        accountKey: 'accountKey'
-      }
-      before(function () {
-        return connector.authorize(options);
-      });
-      after(function () {
-        connector.settings = {
-          apiKey: config.apiKey,
-          accountKey: config.accountKey
-        };
-      });
-      it('does not change the apiKey', function () {
-        expect(connector.settings.apiKey).to.eql(config.apiKey);
-      });
-      it('sets the accountKey', function () {
-        expect(connector.settings.accountKey).to.eql(options.accountKey);
-      });
-      it('does not change the domain', function () {
-        expect(connector.settings.domain).to.eql(config.domain + 'test');
-      });
-    });
-    describe('with only apiKey', function () {
-      var options = {
-        apiKey: 'apiKey'
-      }
-      before(function () {
-        return connector.authorize(options);
-      });
-      after(function () {
-        connector.settings = {
-          apiKey: config.apiKey,
-          accountKey: config.accountKey
-        };
-      });
-      it('sets the apiKey', function () {
-        expect(connector.settings.apiKey).to.eql(options.apiKey);
-      });
-      it('does not change the accountKey', function () {
-        expect(connector.settings.accountKey).to.eql(config.accountKey);
-      });
-    });
-  });
+  
 });

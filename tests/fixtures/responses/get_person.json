@@ -1,0 +1,47 @@
+{
+  "person": {
+    "author-id": {
+      "-type": "integer",
+      "#text": "1109068"
+    },
+    "company-id": {
+      "-type": "integer",
+      "-nil": "true"
+    },
+    "created-at": {
+      "-type": "datetime",
+      "#text": "2015-02-20T02:06:38Z"
+    },
+    "first-name": "Steve",
+    "group-id": {
+      "-type": "integer",
+      "-nil": "true"
+    },
+    "id": {
+      "-type": "integer",
+      "#text": "227913545"
+    },
+    "last-name": "Jones",
+    "owner-id": {
+      "-type": "integer",
+      "-nil": "true"
+    },
+    "title": "CPO",
+    "updated-at": {
+      "-type": "datetime",
+      "#text": "2015-02-20T02:06:38Z"
+    },
+    "visible-to": "Everyone",
+    "company-name": { "-nil": "true" },
+    "linkedin-url": { "-nil": "true" },
+    "avatar-url": "http://cdn.37img.com/highrise/missing/avatar.gif?r=3",
+    "contact-data": {
+      "instant-messengers": { "-type": "array" },
+      "twitter-accounts": { "-type": "array" },
+      "phone-numbers": { "-type": "array" },
+      "web-addresses": { "-type": "array" },
+      "addresses": { "-type": "array" },
+      "email-addresses": { "-type": "array" }
+    }
+  }
+}
