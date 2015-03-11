@@ -42,9 +42,10 @@
     "gettingStarted" : "./samples/gettingStarted.js"
   },
   "endpoints" : {
-    "category.api" : {
-      "sample" : "./samples/people.js",
-      "docs" : "https://github.com/basecamp/highrise-api/blob/master/sections/people.md"
+    "people" : {
+      "sample" : "./samples/gettingStarted.js",
+      "docs" : "https://github.com/basecamp/highrise-api/blob/master/sections/people.md",
+      "subscribe" : true
     }
   }
 }
