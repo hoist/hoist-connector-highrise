@@ -8,7 +8,7 @@ var Model = require('hoist-model');
 var mongoose = BBPromise.promisifyAll(Model._mongoose);
 var SubscriptionController = require('../fixtures/subscription_controller');
 
-describe('Poll Integration', function () {
+describe.skip('Poll Integration', function () {
   before(function () {
     return mongoose.connectAsync(config.get('Hoist.mongo.db'))
       .then(function() {
@@ -115,7 +115,7 @@ describe('Poll Integration', function () {
       });
     });
   });
-  describe.skip('with a Public connector', function () {
+  describe('with a Public connector', function () {
     describe('with no lastPolled for each endpoint', function () {
       var _app, _bucket, _subscription, _bouncerToken, _conn;
       describe('with results from Highrise', function () {
