@@ -5,11 +5,20 @@
   "auth_types" : {
     "Private": {
       "setup_help": "./samples/setupHelp.md",
-      "requires_signing" : false
+      "requires_signing" : false,
+      "features" : [
+        "One Highrise Account",
+        "Domain and API copied from Highrise",
+        "No auth steps"
+      ]
     },
     "Public": {
       "setup_help": "./samples/setupHelpPublic.md",
-      "requires_signing" : true
+      "requires_signing" : true,
+      "features" : [
+        "Mangage multiple Highrise accounts",
+        "Hoist handles the OAuth"
+      ]
     }
   },
   "settings": [{
@@ -30,8 +39,7 @@
     "description": "Client ID",
     "for_types": ["Public"],
     "required": true
-  },
-  {
+  },{
     "key": "clientSecret",
     "type" : "text",
     "description": "Client Secret",
