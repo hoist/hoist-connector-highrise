@@ -8,7 +8,7 @@ var requestPromise = require('request-promise');
 var config = require('config');
 var errors = require('@hoist/errors');
 
-describe('HighriseConnector', function () {
+describe.only('HighriseConnector', function () {
   var connector;
   before(function () {
     connector = new Highrise({
