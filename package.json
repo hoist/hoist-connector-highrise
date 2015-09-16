@@ -16,6 +16,7 @@
     "url": "https://github.com/hoist/hoist-connector-highrise/issues"
   },
   "devDependencies": {
+    "@hoist/model": "^1.1.2",
     "chai": "^1.9.1",
     "chai-as-promised": "^4.1.1",
     "gulp": "^3.8.8",
@@ -27,15 +28,15 @@
     "jshint-stylish": "^0.4.0",
     "run-sequence": "^0.3.6",
     "sinon": "^1.10.3",
-    "sinon-chai": "^2.5.0",
-    "hoist-model": "git://github.com/hoist/hoist-model"
+    "sinon-chai": "^2.5.0"
   },
   "homepage": "https://github.com/hoist/hoist-connector-highrise",
   "dependencies": {
+    "@hoist/errors": "^1.0.3",
+    "@hoist/logger": "^1.0.5",
+    "@hoist/oauth": "^1.0.0",
     "bluebird": "^2.3.11",
     "config": "^1.8.1",
-    "hoist-errors": "git://github.com/hoist/hoist-errors",
-    "hoist-logger": "git://github.com/hoist/hoist-logger",
     "jsontoxml": "^0.0.11",
     "lodash": "^2.4.1",
     "moment": "^2.9.0",

@@ -4,7 +4,7 @@ var Poll = require('../../lib/poll');
 require('../bootstrap');
 var BBPromise = require('bluebird');
 var expect = require('chai').expect;
-var Model = require('hoist-model');
+var Model = require('@hoist/model');
 var mongoose = BBPromise.promisifyAll(Model._mongoose);
 var SubscriptionController = require('../fixtures/subscription_controller');
 
@@ -52,7 +52,7 @@ describe.skip('Poll Integration', function () {
             new Model.ConnectorSetting({
               _id: 'ConnectorSettingIdPrivate',
               settings: {
-                apiToken: config.apiToken, 
+                apiToken: config.apiToken,
                 domain: config.domain
               },
               environment: 'test',

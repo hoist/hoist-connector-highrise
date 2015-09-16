@@ -6,13 +6,13 @@ var BBPromise = require('bluebird');
 var expect = require('chai').expect;
 var requestPromise = require('request-promise');
 var config = require('config');
-var errors = require('hoist-errors');
+var errors = require('@hoist/errors');
 
 describe('HighriseConnector', function () {
   var connector;
   before(function () {
     connector = new Highrise({
-      apiToken: config.apiToken, 
+      apiToken: config.apiToken,
       domain: config.domain
     });
   });
@@ -521,5 +521,5 @@ describe('HighriseConnector', function () {
       });
     });
   });
-  
+
 });
