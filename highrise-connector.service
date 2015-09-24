@@ -8,8 +8,8 @@ User=core
 Type=oneshot
 ExecStartPre=-/usr/bin/docker kill highrise-connector-deploy
 ExecStartPre=-/usr/bin/docker rm highrise-connector-deploy
-ExecStartPre=-/usr/bin/docker pull quay.io/hoist/connector-highrise:master
-ExecStart=/usr/bin/docker run -h highrise-connector-deploy --name highrise-connector-deploy -e "ROOT_CONNECTOR_DIR=/shares/connectors" --volumes-from config -P quay.io/hoist/connector-highrise:master
+ExecStartPre=-/usr/bin/docker pull hoist/connector-highrise:master
+ExecStart=/usr/bin/docker run -h highrise-connector-deploy --name highrise-connector-deploy -e "ROOT_CONNECTOR_DIR=/shares/connectors" --volumes-from config -P hoist/connector-highrise:master
 ExecStop=/usr/bin/docker stop highrise-connector-deploy
 ExecStopPost=-/usr/bin/docker kill highrise-connector-deploy
 ExecStopPost=-/usr/bin/docker rm highrise-connector-deploy
