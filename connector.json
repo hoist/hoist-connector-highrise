@@ -1,12 +1,12 @@
 {
   "name": "Highrise",
-  "slug" : "highrise",  
+  "slug": "highrise",
   "url": "http://www.highrisehq.com",
-  "auth_types" : {
+  "auth_types": {
     "Private": {
       "setup_help": "./samples/setupHelp.md",
-      "requires_signing" : false,
-      "features" : [
+      "requires_signing": false,
+      "features": [
         "One Highrise Account",
         "Domain and API copied from Highrise",
         "No auth steps"
@@ -14,8 +14,8 @@
     },
     "Public": {
       "setup_help": "./samples/setupHelpPublic.md",
-      "requires_signing" : true,
-      "features" : [
+      "requires_signing": true,
+      "features": [
         "Mangage multiple Highrise accounts",
         "Hoist handles the OAuth"
       ]
@@ -23,37 +23,44 @@
   },
   "settings": [{
     "key": "apiToken",
-    "type" : "text",
+    "type": "text",
     "description": "API Token",
     "for_types": ["Private"],
     "required": true
-  },{
+  }, {
     "key": "domain",
-    "type" : "text",
+    "type": "text",
     "description": "Domain",
     "for_types": ["Private"],
     "required": true
-  },{
+  }, {
     "key": "clientId",
-    "type" : "text",
+    "type": "text",
     "description": "Client ID",
     "for_types": ["Public"],
     "required": true
-  },{
+  }, {
     "key": "clientSecret",
-    "type" : "text",
+    "type": "text",
     "description": "Client Secret",
     "for_types": ["Public"],
     "required": true
   }],
-  "samples" : {
-    "gettingStarted" : "./samples/gettingStarted.js"
+  "samples": {
+    "gettingStarted": "./samples/gettingStarted.js"
   },
-  "endpoints" : {
-    "people" : {
-      "sample" : "./samples/gettingStarted.js",
-      "docs" : "https://github.com/basecamp/highrise-api/blob/master/sections/people.md",
-      "subscribe" : true
+  "endpoints": {
+    "people": {
+      "sample": "./samples/gettingStarted.js",
+      "docs": "https://github.com/basecamp/highrise-api/blob/master/sections/people.md",
+      "subscribe": true,
+      "events": ["new", "modified"]
+    },
+    "companies": {
+      "sample": "./samples/gettingStarted.js",
+      "docs": "https://github.com/basecamp/highrise-api/blob/master/sections/companies.md",
+      "subscribe": true,
+      "events": ["new", "modified"]
     }
   }
 }
