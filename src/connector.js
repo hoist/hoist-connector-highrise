@@ -1,7 +1,4 @@
 'use strict';
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
 var BBPromise = require('bluebird');
 var requestPromise = require('request-promise');
 var xml2js = require('xml2js');
@@ -24,8 +21,15 @@ function HighriseConnector(settings) {
     ignoreAttrs: false,
     async: true
   }));
-  this.auth = new OAuth(settings.clientId, settings.clientSecret, 'https://launchpad.37signals.com/', 'authorization/new', 'authorization/token');
-  this.auth.getOAuthAccessTokenAsync = BBPromise.promisify(this.auth.getOAuthAccessToken, { multiArgs: true });
+  this.auth = new OAuth(
+    settings.clientId,
+    settings.clientSecret,
+    'https://launchpad.37signals.com/',
+    'authorization/new',
+    'authorization/token'
+  );
+  this.auth.getOAuthAccessTokenAsync = BBPromise.promisify(this.auth.getOAuthAccessToken, {multiArgs:true});
+
 }
 
 HighriseConnector.prototype.get = function (url, queryParams) {
@@ -124,23 +128,24 @@ HighriseConnector.prototype.request = function request(method, path, queryParams
         JSON.parse(data);
         data = js2xml(data);
       } catch (e) {} // not json so just pass through
-    } else if ((typeof data === 'undefined' ? 'undefined' : _typeof(data)) === 'object') {
-        data = js2xml(data);
-      }
+    } else if (typeof data === 'object') {
+      data = js2xml(data);
+    }
     options.body = data;
     options.contentType = 'application/xml';
   }
 
   var self = this;
-  return this.requestPromiseHelper(options).then(function (request) {
-    if (method === "DELETE" && request.statusCode === 200) {
-      return {};
-    }
-    logger.info({
-      xml: request.body
-    }, 'got response from request');
-    return self.parser.parseStringAsync(request.body);
-  });
+  return this.requestPromiseHelper(options)
+    .then(function (request) {
+      if (method === "DELETE" && request.statusCode === 200) {
+        return {};
+      }
+      logger.info({
+        xml: request.body
+      }, 'got response from request');
+      return self.parser.parseStringAsync(request.body);
+    });
 };
 
 HighriseConnector.prototype.requestPromiseHelper = function requestPromiseHelper(options) {
@@ -153,50 +158,55 @@ HighriseConnector.prototype.receiveBounce = function receiveBounce(bounce) {
     if (bounce.get('requestToken')) {
       /* Second hit */
       return this.auth.getOAuthAccessTokenAsync(bounce.query.code, {
-        type: 'web_server',
-        /*jshint camelcase: false */
-        redirect_uri: 'https://' + config.get('Hoist.domains.bouncer') + '/bounce'
-      }).then(function (accessToken) {
-        return bounce.set('accessToken', accessToken[0]).then(function () {
+          type: 'web_server',
           /*jshint camelcase: false */
-          return bounce.set('expiresIn', accessToken[2].expires_in);
-        }).then(function () {
-          return requestPromise.get({
-            uri: 'https://launchpad.37signals.com/authorization.json',
-            headers: {
-              "User-Agent": "Hoist Integration (support@hoist.io)",
-              "Authorization": "Bearer " + accessToken[0],
-              "Content-Type": "application/json"
-            }
-          }).then(function (res) {
-            var saveAccounts = [];
-            res = JSON.parse(res);
-            _.each(res.accounts, function (a) {
-              if (a.product === 'highrise') {
-                saveAccounts.push(a);
-              }
+          redirect_uri: 'https://' + config.get('Hoist.domains.bouncer') + '/bounce'
+        })
+        .then(function (accessToken) {
+          return bounce.set('accessToken', accessToken[0])
+            .then(function () {
+              /*jshint camelcase: false */
+              return bounce.set('expiresIn', accessToken[2].expires_in);
+            })
+            .then(function () {
+              return requestPromise.get({
+                uri: 'https://launchpad.37signals.com/authorization.json',
+                headers: {
+                  "User-Agent": "Hoist Integration (support@hoist.io)",
+                  "Authorization": "Bearer " + accessToken[0],
+                  "Content-Type": "application/json"
+                }
+              }).then(function (res) {
+                var saveAccounts = [];
+                res = JSON.parse(res);
+                _.each(res.accounts, function (a) {
+                  if (a.product === 'highrise') {
+                    saveAccounts.push(a);
+                  }
+                });
+                if (saveAccounts.length === 0) {
+                  throw new errors.connector.request.InvalidError('user has no highrise accounts');
+                } else {
+                  return bounce.set('accounts', saveAccounts);
+                }
+              }).then(function () {
+                return bounce.done();
+              });
             });
-            if (saveAccounts.length === 0) {
-              throw new errors.connector.request.InvalidError('user has no highrise accounts');
-            } else {
-              return bounce.set('accounts', saveAccounts);
-            }
-          }).then(function () {
-            return bounce.done();
-          });
         });
-      });
     } else {
       /* First hit */
       /*jshint camelcase: false */
-      return bounce.set('requestToken', true).bind(this).then(function () {
-        bounce.redirect(this.auth.getAuthorizeUrl({
-          scope: 'all',
-          type: 'web_server',
-          response_type: 'web_server',
-          redirect_uri: 'https://' + config.get('Hoist.domains.bouncer') + '/bounce'
-        }));
-      });
+      return bounce.set('requestToken', true)
+        .bind(this)
+        .then(function () {
+          bounce.redirect(this.auth.getAuthorizeUrl({
+            scope: 'all',
+            type: 'web_server',
+            response_type: 'web_server',
+            redirect_uri: 'https://' + config.get('Hoist.domains.bouncer') + '/bounce'
+          }));
+        });
     }
   }
   bounce.done();
@@ -209,4 +219,3 @@ HighriseConnector.prototype.authorize = function (authorization) {
 };
 
 module.exports = HighriseConnector;
-//# sourceMappingURL=connector.js.map

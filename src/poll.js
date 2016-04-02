@@ -1,5 +1,4 @@
 'use strict';
-
 var _ = require('lodash');
 var Connector = require('./connector');
 var logger = require('@hoist/logger');
@@ -14,6 +13,7 @@ var ConnectorRequiresAuthorizationError = errors.create({
   name: 'ConnectorRequiresAuthorizationError'
 });
 
+
 var endpointSingulars = {
   "people": "person",
   "companies": "company"
@@ -25,7 +25,7 @@ function HighrisePoller(context) {
   this.connector = new Connector(context.settings);
 }
 HighrisePoller.prototype = {
-  assertCanPoll: function assertCanPoll() {
+  assertCanPoll: function () {
     return BBPromise.try(function () {
       var frequency = 24 * 60 * this.context.subscription.endpoints.length / apiLimit;
       var lastPolled = this.context.subscription.get('lastPolled');
@@ -33,40 +33,45 @@ HighrisePoller.prototype = {
         this.context.subscription.delayTill(moment(lastPolled).add(frequency, 'minutes').toDate());
         throw new APILimitReachedError();
       }
-      if (this.context.settings.authType !== 'Private' && !this.context.authorization) {
+      if (this.context.settings.authType !== 'Private' && !(this.context.authorization)) {
         throw new ConnectorRequiresAuthorizationError();
       }
     }, [], this);
   },
-  pollSubscription: function pollSubscription() {
+  pollSubscription: function () {
     return BBPromise.try(function () {
-      return this.assertCanPoll();
-    }, [], this).bind(this).then(function () {
-      this.context.subscription.set('lastPolled', moment.utc().format());
-    }).then(function () {
+        return this.assertCanPoll();
+      }, [], this)
+      .bind(this)
+      .then(function () {
+        this.context.subscription.set('lastPolled', moment.utc().format());
+      }).then(function () {
 
-      if (this.context.authorization) {
-        logger.info('setting auth');
-        this.connector.authorize(this.context.authorization);
-      } else {
-        logger.info('no auth to set');
-      }
-    }).then(function () {
-      logger.info('generating pollEndpoing promises');
-      return _.map(this.context.subscription.endpoints, _.bind(this.pollEndpoint, this));
-    }).then(function (pollPromises) {
-      logger.info('settling promises');
-      return BBPromise.settle(pollPromises);
-    }).then(function () {
-      logger.info('done with poll');
-    }).catch(function (err) {
-      logger.error(err, 'polling error');
-      if (!(err instanceof APILimitReachedError) && !(err instanceof ConnectorRequiresAuthorizationError)) {
-        logger.alert(err);
-      }
-    });
+        if (this.context.authorization) {
+          logger.info('setting auth');
+          this.connector.authorize(this.context.authorization);
+        } else {
+          logger.info('no auth to set');
+        }
+      })
+      .then(function () {
+        logger.info('generating pollEndpoing promises');
+        return _.map(this.context.subscription.endpoints, _.bind(this.pollEndpoint, this));
+      }).then(function (pollPromises) {
+        logger.info('settling promises');
+        return BBPromise.settle(pollPromises);
+      })
+      .then(function () {
+        logger.info('done with poll');
+      }).catch(function (err) {
+        logger.error(err, 'polling error');
+        if (!(err instanceof APILimitReachedError) && !(err instanceof ConnectorRequiresAuthorizationError)) {
+          logger.alert(err);
+        }
+      });
+
   },
-  pollEndpoint: function pollEndpoint(endpoint) {
+  pollEndpoint: function (endpoint) {
     var singularEndpointName = endpointSingulars[endpoint];
     var _lastPoll = this.context.subscription.get(endpoint) ? this.context.subscription.get(endpoint).lastPolled : null;
 
@@ -83,17 +88,19 @@ HighrisePoller.prototype = {
     }, 'polling endpoint');
     var timeNow = moment.utc().format();
     var get = this.connector.get(formattedEndpoint, extraQueryParams);
-    return get.bind(this).then(function (results) {
-      logger.debug({
-        results: results,
-        endpoint: endpoint
-      }, 'got results from endpoint');
-      return this.handleResults(results, endpoint, singularEndpointName, _lastPoll, timeNow);
-    }).catch(function (err) {
-      logger.error(err);
-    });
+    return get
+      .bind(this)
+      .then(function (results) {
+        logger.debug({
+          results: results,
+          endpoint: endpoint
+        }, 'got results from endpoint');
+        return this.handleResults(results, endpoint, singularEndpointName, _lastPoll, timeNow);
+      }).catch(function (err) {
+        logger.error(err);
+      });
   },
-  handleResults: function handleResults(results, endpoint, singularEndpointName, _lastPoll, timeNow) {
+  handleResults: function (results, endpoint, singularEndpointName, _lastPoll, timeNow) {
     var self = this;
     logger.debug({
       Results: results,
@@ -119,27 +126,31 @@ HighrisePoller.prototype = {
         connectorKey: self.connectorKey
       };
     });
-    return BBPromise.settle(_.map(mappedResults, _.bind(this.raiseEvent, this))).bind(this).then(function () {
-      var endpointData = this.context.subscription.get(endpoint);
-      endpointData.lastPolled = timeNow;
-      this.context.subscription.set(endpoint, endpointData);
-    }).catch(function (err) {
-      logger.error(err);
-    });
+    return BBPromise.settle(_.map(mappedResults, _.bind(this.raiseEvent, this)))
+      .bind(this)
+      .then(function () {
+        var endpointData = this.context.subscription.get(endpoint);
+        endpointData.lastPolled = timeNow;
+        this.context.subscription.set(endpoint, endpointData);
+      }).catch(function (err) {
+        logger.error(err);
+      });
   },
-  raiseEvent: function raiseEvent(result) {
+  raiseEvent: function (result) {
     logger.debug({
       result: result
     }, 'raising event');
-    return this.checkIfNew(result).bind(this).then(function (isNew) {
-      var eventName = result.connectorKey + (isNew ? ':new' : ':modified') + ":" + result.endpoint.toLowerCase();
-      logger.info({
-        eventName: eventName
-      }, 'raising event');
-      return this.emit(eventName, result.result);
-    });
+    return this.checkIfNew(result)
+      .bind(this)
+      .then(function (isNew) {
+        var eventName = result.connectorKey + (isNew ? ':new' : ':modified') + ":" + result.endpoint.toLowerCase();
+        logger.info({
+          eventName: eventName
+        }, 'raising event');
+        return this.emit(eventName, result.result);
+      });
   },
-  checkIfNew: function checkIfNew(result) {
+  checkIfNew: function (result) {
     var isNew = false;
     if (result.result['created-at'][0]._ && moment(result.result['created-at'][0]._).isAfter(result.lastPoll)) {
       isNew = true;
@@ -166,4 +177,3 @@ module.exports = function (context, raiseCallback) {
   poller.emit = raiseCallback;
   return poller.pollSubscription();
 };
-//# sourceMappingURL=poll.js.map
